@@ -50,6 +50,10 @@ func (c *Cache) GetUsers() ([]User, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Skip caching if no results are returned.
+		if len(res) == nil {
+			return nil, nil
+		}
 		b, err := json.Marshal(res)
 		if err != nil {
 			return nil, err
