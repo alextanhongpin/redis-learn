@@ -2,11 +2,21 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/go-redis/redis"
 )
 
+// Users can react to a post.
+// Users can choose one of the given reaction.
+// Users can only react once for a post.
+// Users can unreact to a post.
+// System can return the total number of reactions of a post.
+// System can return the total number of count for each reactions. (?)
+
 type ReactionManager interface {
-	React(userID, mediaID, reactionType string) error
-	Unreact(userID, mediaID, reactionType string) error
+	React(mediaID, userID, reactionType string) error
+	Unreact(mediaID, userID string) error
+	Count(mediaID string) int64
 }
 
 type PostReactionManager struct {
@@ -17,18 +27,17 @@ func NewPostReactionManager(client *redis.Client) *PostReactionManager {
 	return &PostReactionManager{client}
 }
 
-func postReaction(postID, reactionType string) string {
-	// return strings.Join([]string{postID, reactionType}, ":")
-	return fmt.Sprintf("%s:%s", postID, reactionType)
-}
-
-func (p *PostReactionManager) React(userID, postID, reactionType string) error {
+func (p *PostReactionManager) React(postID, userID, reactionType string) error {
 	// ? Is Redis Set performant enough to keep track of the unique likes of the user?
-	return p.client.SAdd(postReaction(postID, reactionType), userID).Err()
+	return p.client.HSet(postID, userID, reactionType).Err()
 }
 
-func (p *PostReactionManager) Unreact(userID, postID, reactionType string) error {
-	return p.client.SRem(postReaction(postID, reactionType), userID).Err()
+func (p *PostReactionManager) Unreact(postID, userID string) error {
+	return p.client.HDel(postID, userID).Err()
+}
+
+func (p *PostReactionManager) Count(postID string) int64 {
+	return p.client.HLen(postID).Val()
 }
 
 func NewClient() *redis.Client {
@@ -45,7 +54,16 @@ func main() {
 
 	userID := "john"
 	postID := "hello world"
-	reactionType = "happy" // sad, angry, amazed, like
-	fmt.Println(reactionManager.React(userID, postID, reactionType))
-	fmt.Println(reactionManager.Unreact(userID, postID, reactionType))
+	reactionType := "happy" // sad, angry, amazed, like
+
+	{
+		fmt.Println(reactionManager.React(postID, userID, reactionType))
+		// Second time react with sad emoji.
+		fmt.Println(reactionManager.React(postID, userID, "sad"))
+	}
+
+	// We can only get the total count of the posts.
+	fmt.Println(reactionManager.Count(postID))
+	fmt.Println(reactionManager.Unreact(postID, userID))
+	fmt.Println(reactionManager.Count(postID))
 }
