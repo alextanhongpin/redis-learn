@@ -1,13 +1,13 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strconv"
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -77,37 +77,41 @@ func (t *TimeSeries) Insert(timestampInSeconds int64) {
 }
 
 func (t *TimeSeries) Fetch(granularityName string, startTimestamp, endTimestamp int64) ([]Series, error) {
-
 	granularity, ok := t.granularities[granularityName]
 	if !ok {
 		return nil, errors.New("granularity does not exist")
 	}
 	start := t.roundTimestamp(startTimestamp, granularity.Duration)
 	end := t.roundTimestamp(endTimestamp, granularity.Duration)
-	multi := t.client.Pipeline()
+	fmt.Println("start, end", start, end)
 
 	var result []*redis.StringCmd
-	for ts := start; ts <= end; ts += granularity.Duration {
-		key := t.key(granularity, ts)
-		field := strconv.FormatInt(t.roundTimestamp(ts, granularity.Duration), 10)
-		result = append(result, multi.HGet(key, field))
+	_, err := t.client.Pipelined(func(pipe redis.Pipeliner) error {
+		for ts := start; ts <= end; ts += granularity.Duration {
+			key := t.key(granularity, ts)
+			field := strconv.FormatInt(t.roundTimestamp(ts, granularity.Duration), 10)
+			fmt.Println("key, field", key, field)
+			result = append(result, pipe.HGet(key, field))
+		}
+		return nil
+	})
+	if err != nil && err != redis.Nil {
+		return nil, errors.Wrap(err, "pipeline error")
 	}
-	res, err := multi.Exec()
-	if err != nil {
-		return nil, err
-
-	}
-	fmt.Println("exec res", res)
-
-	fmt.Println("multi", result)
 	output := make([]Series, len(result))
 	for i, res := range result {
-		val, err := res.Int64()
-		if err != nil {
-			return nil, err
+		val := res.Val()
+		var count int64
+		if val != "" {
+			var err error
+			count, err = strconv.ParseInt(val, 10, 64)
+			if err != nil {
+				return nil, err
+			}
 		}
+
 		ts := startTimestamp + int64(i)*granularity.Duration
-		output[i] = Series{Timestamp: ts, Value: val}
+		output[i] = Series{Timestamp: ts, Value: count}
 	}
 	return output, nil
 }
@@ -130,6 +134,7 @@ func main() {
 	timeseries.Insert(startTimestamp + 3)
 	timeseries.Insert(startTimestamp + 61)
 	{
+		fmt.Println("operation 1")
 		results, err := timeseries.Fetch("1sec", startTimestamp, startTimestamp+3)
 		if err != nil {
 			log.Fatal(err)
@@ -138,10 +143,12 @@ func main() {
 
 	}
 	{
+		fmt.Println("operation 2")
 		results, err := timeseries.Fetch("1min", startTimestamp, startTimestamp+120)
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("displaying results")
 		displayResults("1min", results)
 	}
 }
