@@ -1,0 +1,42 @@
+version: '3.7'
+services:
+        redis-master:
+                image: redis:5.0.5
+                command: "redis-server /usr/local/etc/redis/redis.conf"
+                ports:
+                        - 127.0.0.1:6379:6379
+                volumes:
+                        - ./master.conf:/usr/local/etc/redis/redis.conf
+                networks:
+                        - redis-network
+        redis-slave-01:
+                command: "redis-server /usr/local/etc/redis/redis.conf"
+                image: redis:5.0.5
+                ports:
+                        - 127.0.0.1::6379
+                volumes:
+                        - ./slave.conf:/usr/local/etc/redis/redis.conf
+                networks:
+                        - redis-network
+        redis-slave-02:
+                command: "redis-server /usr/local/etc/redis/redis.conf"
+                image: redis:5.0.5
+                ports:
+                        - 127.0.0.1::6379
+                volumes:
+                        - ./slave.conf:/usr/local/etc/redis/redis.conf
+                networks:
+                        - redis-network
+        redis-sentinel:
+                command: "redis-server /usr/local/etc/redis/sentinel.conf --sentinel" 
+                image: redis:5.0.5
+                ports:
+                        - 127.0.0.1:26379:26379
+                        - 127.0.0.1::6379
+                volumes:
+                        - ./sentinel.conf:/usr/local/etc/redis/sentinel.conf
+                networks:
+                        - redis-network
+networks:
+        redis-network:
+                driver: bridge
