@@ -62,8 +62,8 @@ func (v *VotingManagerImpl) GetVote(president string) (*Vote, error) {
 func NewClient() *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "", // No password set.
-		DB:       0,  // Use default db.
+		Password: "123456", // No password set.
+		DB:       0,        // Use default db.
 	})
 }
 
