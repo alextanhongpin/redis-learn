@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+         app: redis
+    spec:
+      # volumes:
+      #   - name: redis-tmp
+      #     hostPath:
+      #       path: /tmp
+      containers:
+      - name: redis
+        image: redis:5.0.5
+        imagePullPolicy: IfNotPresent
+        command:
+        - redis-server
+        - '/redis-master/redis.conf'
+        resources:
+          requests:
+            cpu: 250m
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /redis-master-data
+          name: data
+        - mountPath: /redis-master
+          name: config
+        ports:
+        - containerPort: 6379
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: config
+        configMap:
+          name: example-redis-config-dgh9dg555m
+          items:
+          - key: redis-config
+            path: redis.conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  labels:
+    app: redis
+spec:
+  type: NodePort
+  ports:
+  - port: 6379
+    name: redis
+    # nodePort: 6379
+  selector:
+    app: redis
