@@ -23,7 +23,7 @@ func NewClient() *redis.Client {
 
 func main() {
 	var (
-		consumerName = "bob"
+		consumerName = "john"
 		groupName    = "mygroup"
 		streamName   = "mystream"
 		block        = 2 * time.Second
