@@ -100,3 +100,18 @@ Usecases:
 
 https://tech.trivago.com/2017/01/25/learn-redis-the-hard-way-in-production/
 
+## Cache Prewarm
+
+http://dmitrypol.github.io/redis/2017/03/27/redis-cache-pregen.html
+https://sorentwo.com/2015/07/27/optimizing-redis-usage-for-caching.html
+
+## Optimization
+https://aws.amazon.com/caching/implementation-considerations/
+https://d0.awsstatic.com/whitepapers/performance-at-scale-with-amazon-elasticache.pdf#page40
+http://highscalability.com/strategy-break-memcache-dog-pile
+
+## Task Queues
+
+https://charlesleifer.com/blog/multi-process-task-queue-using-redis-streams/
+https://slack.engineering/scaling-slacks-job-queue-687222e9d100?gi=14c80a524901
+
