@@ -96,3 +96,7 @@ Usecases:
 ## How to do bitops with redis
 ## Redis modules
 
+## Good articles
+
+https://tech.trivago.com/2017/01/25/learn-redis-the-hard-way-in-production/
+
