@@ -115,3 +115,13 @@ http://highscalability.com/strategy-break-memcache-dog-pile
 https://charlesleifer.com/blog/multi-process-task-queue-using-redis-streams/
 https://slack.engineering/scaling-slacks-job-queue-687222e9d100?gi=14c80a524901
 
+## Delete keys by pattern
+
+```bash
+$ redis-cli —scan —pattern users:* | xargs redis-cli del
+```
+To run in the background:
+```bash
+$ redis-cli —scan —pattern users:* | xargs redis-cli unlink
+```
+
