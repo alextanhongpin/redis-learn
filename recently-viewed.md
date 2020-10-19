@@ -26,11 +26,16 @@ zadd job -5 job-5
 Return the list of jobs from lowest score (latest date entry) to highest score.
 
 ```
+# Take from the lowest score to the highest score (will return all items)
 zrange job 0 -1
+
+# Or if we just want to take the 10 lowest score. (This will return 10 items, from rank 0-9)
+zrange job 0 9
 ```
 
 Keep the last 3 item, and delete the rest.
 
 ```
+# Remove all items starting from position 3 (in a list of 5 items, item 4 and 5 will be removed)
 zremrangebyrank job 3 -1
 ```
