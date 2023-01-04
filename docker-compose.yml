@@ -1,50 +1,17 @@
-version: "3.7"
-services:
-        redis-master: 
-                image: bitnami/redis:5.0.5
-                ports: 
-                        - 127.0.0.1:6379:6379
-                environment:
-                        - REDIS_REPLICATION_MODE=master
-                        - REDIS_PASSWORD=123456
-                networks:
-                        - redis-network
-        redis-slave01:
-                image: 'bitnami/redis:5.0.5'
-                ports:
-                        - 127.0.0.1::6379
-                environment:
-                        - REDIS_REPLICATION_MODE=slave
-                        - REDIS_MASTER_HOST=redis-master
-                        - REDIS_MASTER_PORT_NUMBER=6379
-                        - REDIS_MASTER_PASSWORD=123456
-                        - REDIS_PASSWORD=mypassword
-                networks:
-                        - redis-network
-        redis-slave02:
-                image: 'bitnami/redis:5.0.5'
-                ports:
-                        - 127.0.0.1::6379
-                environment:
-                        - REDIS_REPLICATION_MODE=slave
-                        - REDIS_MASTER_HOST=redis-master
-                        - REDIS_MASTER_PORT_NUMBER=6379
-                        - REDIS_MASTER_PASSWORD=123456
-                        - REDIS_PASSWORD=mypassword
-                networks:
-                        - redis-network
-        redis-sentinel:
-                image: bitnami/redis-sentinel:5.0.5
-                environment:
-                        - REDIS_MASTER_HOST=redis-master
-                        - REDIS_MASTER_PASSWORD=123456
-                        - REDIS_MASTER_PORT_NUMBER=6379
-                        - REDIS_SENTINEL_QUORUM=2
-                ports: 
-                        - 127.0.0.1:26379:26379
-                networks:
-                        - redis-network
+version: '3.8'
 
-networks:
-        redis-network:
-                driver: bridge
+services:
+  redis:
+    image: docker.io/bitnami/redis:7.0
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+
+volumes:
+  redis_data:
+    driver: local
