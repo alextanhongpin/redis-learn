@@ -28,7 +28,7 @@ The output will be the id of the newly added element, consisting of a timestamp 
 
 ```
 # Returns the number of elements in the stream.
-XLEN stream$ 
+XLEN stream$
 
 # Query the elements in the stream by start and end id, or - to + indicates the smallest id to the largest id. We can limit the number of items returned with COUNT syntax
 XRANGE stream$ - + COUNT 2
@@ -55,7 +55,7 @@ Allows multiple consumers to process the same stream to implement load balancing
 XGROUP CREATE stream$ mygroup01 $
 
 # Seed test data.
-XADD mystream * message apple 
+XADD mystream * message apple
 XADD mystream * message banana
 
 # Reading data through the consumer group.
