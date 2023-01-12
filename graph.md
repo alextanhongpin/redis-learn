@@ -112,5 +112,12 @@ graph.query social "match (me:User{name: 'charles'})-[]->(fw) return fw.name"
 -- alice knows charles, who knows bob and elie
 graph.query social "match (me:User{name: 'alice'})-[]-(fw) match (:User{name: fw.name})-[]-(fof) where me <> fof return distinct(fof.name)"
 
+-- This doesn't work somehow ...
+graph.query social "match (me:User{name: 'alice'})-[:FRIENDS_WITH*2]-(fof) where me <> fof return distinct(fof.name)"
+graph.query social "match (me:User{name: 'alice'})-[]->(fw)<-[]-(fof) where me <> fof return fw.name, fof.name"
+graph.query social "match (me:User{name: 'alice'})--()--(fof:User) return fof.name"
+graph.query social "match (me:User{name: 'alice'})-[]-(fw)-[:FRIENDS_WITH]->(fof) return fof"
+graph.query social "match (me:User{name: 'alice'})-[:FRIENDS_WITH]-()-[:FRIENDS_WITH]-(fof) where me <> fof return fof"
+
 graph.delete social
 ```
