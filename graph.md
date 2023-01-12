@@ -82,6 +82,14 @@ graph.query social "match (:User {name: 'charles'})-[:FRIENDS_WITH]->(fw) return
 -- Find users with the same friends.
 graph.query social "match (:User)-[]->()<-[]-(fof) return fof"
 
+-- Expected to get alice's friend's friend, which is charles's friends, bob.
+-- But doesn't work. The same query seems to work with memgraph.
+graph.query social "match (:User{name: 'alice'})-[]-()-[]-(fof) return fof"
+graph.query social "match (:User{name: 'alice'})-[]-(fw)-[]-(fof) return fof"
+
+-- This seems to work.
+graph.query social "match (me:User{name: 'alice'})-[]->(fw) match (User{name: fw.name})<-[]-(fof) where me <> fof return fof"
+
 -- Add two more nodes
 damian is friend with alice
 elie is friend with charles
